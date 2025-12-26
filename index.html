@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arabic Word Builder - Fixed Mobile Row</title>
+    <style>
+        :root { --primary: #3498db; --bg: #f4f7f6; }
+        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; min-height: 100vh; padding: 20px 0; }
+        
+        .container { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 95%; max-width: 600px; text-align: center; }
+        
+        #word-preview { 
+            font-size: clamp(2.5rem, 12vw, 5rem); font-weight: bold; min-height: 1.2em; direction: rtl; 
+            border-bottom: 5px solid var(--primary); margin-bottom: 30px; color: #2c3e50; padding: 0 10px;
+        }
+
+        /* This creates the 4-column layout that NEVER stacks */
+        .builder-grid { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px; 
+            direction: rtl; /* Sets the layout flow to Right-to-Left */
+        }
+        
+        .unit { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+        
+        label { font-size: 0.7rem; font-weight: bold; color: #7f8c8d; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
+        
+        select { 
+            width: 100%; max-width: 3cm; padding: 10px 0; font-size: 1.5rem; font-weight: bold; 
+            border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center;
+        }
+
+        .img-slot { 
+            width: 100%; max-width: 3cm; aspect-ratio: 1 / 1; border: 2px solid var(--primary); 
+            border-radius: 10px; display: flex; align-items: center; justify-content: center; 
+            background: #fff; overflow: hidden;
+        }
+
+        .img-slot img { width: 90%; height: 90%; object-fit: contain; }
+
+        /* Mobile specific adjustments to keep things tiny and neat */
+        @media (max-width: 480px) {
+            .container { padding: 10px; }
+            .builder-grid { gap: 5px; }
+            select { font-size: 1.1rem; padding: 5px 0; }
+            label { font-size: 0.55rem; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="word-preview"></div>
+
+    <div class="builder-grid">
+        <div class="unit">
+            <label>Starter</label>
+            <select class="letter-select" data-id="0"></select>
+            <div id="slot-0" class="img-slot"></div>
+        </div>
+        
+        <div class="unit">
+            <label>Original</label>
+            <select class="letter-select" data-id="1"></select>
+            <div id="slot-1" class="img-slot"></div>
+        </div>
+
+        <div class="unit">
+            <label>Outcome</label>
+            <select class="letter-select" data-id="2"></select>
+            <div id="slot-2" class="img-slot"></div>
+        </div>
+
+        <div class="unit">
+            <label>Pre-Outcome</label>
+            <select class="letter-select" data-id="3"></select>
+            <div id="slot-3" class="img-slot"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const letters = ["أ", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي"];
+    const currentWord = ["", "", "", ""];
+    const selects = document.querySelectorAll('.letter-select');
+
+    selects.forEach(select => {
+        let opt = document.createElement('option');
+        opt.text = "—"; opt.value = "";
+        select.add(opt);
+
+        letters.forEach((l, i) => {
+            let o = document.createElement('option');
+            o.value = i; o.text = l;
+            select.add(o);
+        });
+
+        select.addEventListener('change', function() {
+            const id = this.dataset.id;
+            const val = this.value;
+            const slot = document.getElementById(`slot-${id}`);
+            
+            if(val === "") {
+                currentWord[id] = "";
+                slot.innerHTML = "";
+            } else {
+                currentWord[id] = letters[val];
+                // Folder logic: set0 for Starter, set1 for Original, etc.
+                slot.innerHTML = `<img src="set${id}/${val}.svg" alt="letter">`;
+            }
+            // Join letters 0-3. In RTL direction, index 0 appears on the right.
+            document.getElementById('word-preview').textContent = currentWord[0] + currentWord[1] + currentWord[2] + currentWord[3];
+        });
+    });
+</script>
+
+</body>
+</html>
