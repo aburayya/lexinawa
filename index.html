@@ -115,6 +115,45 @@
         });
     });
 </script>
+<script>
+    // Replace 'YOUR_HF_TOKEN' with your actual token from Hugging Face
+    const HF_TOKEN = "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";
+
+
+    async function generateAIImage() {
+        const loader = document.getElementById('loader');
+        const resultImg = document.getElementById('ai-result');
+        
+        // Create a prompt based on the 4 selected items
+        // Example: "A story about Apple, Orange, Cat, and House in one scene"
+        const prompt = `A single high-quality creative illustration combining: ${currentWord[0]}, ${currentWord[1]}, ${currentWord[2]}, and ${currentWord[3]}. Highly detailed, artistic style.`;
+
+        loader.style.display = "block";
+        resultImg.style.display = "none";
+
+        try {
+            const response = await fetch(
+                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
+                {
+                    headers: { Authorization: `Bearer ${HF_TOKEN}` },
+                    method: "POST",
+                    body: JSON.stringify({ inputs: prompt }),
+                }
+            );
+
+            const blob = await response.blob();
+            const imageUrl = URL.createObjectURL(blob);
+            
+            resultImg.src = imageUrl;
+            resultImg.style.display = "block";
+        } catch (error) {
+            alert("AI is busy, try again in a moment!");
+        } finally {
+            loader.style.display = "none";
+        }
+    }
+</script>
 
 </body>
+
 </html>
