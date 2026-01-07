@@ -15,12 +15,11 @@
             border-bottom: 5px solid var(--primary); margin-bottom: 30px; color: #2c3e50; padding: 0 10px;
         }
 
-        /* This creates the 4-column layout that NEVER stacks */
         .builder-grid { 
             display: grid; 
             grid-template-columns: repeat(4, 1fr); 
             gap: 10px; 
-            direction: rtl; /* Sets the layout flow to Right-to-Left */
+            direction: rtl;
         }
         
         .unit { display: flex; flex-direction: column; align-items: center; gap: 10px; }
@@ -40,12 +39,28 @@
 
         .img-slot img { width: 90%; height: 90%; object-fit: contain; }
 
-        /* Mobile specific adjustments to keep things tiny and neat */
+        /* Formula box */
+        #formula-box {
+            margin-top: 20px;
+            width: 100%;
+            min-height: 60px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            font-size: 0.95rem;
+            direction: rtl;
+            text-align: right;
+            resize: vertical;
+            box-sizing: border-box;
+            background: #f9fafb;
+        }
+
         @media (max-width: 480px) {
             .container { padding: 10px; }
             .builder-grid { gap: 5px; }
             select { font-size: 1.1rem; padding: 5px 0; }
             label { font-size: 0.55rem; }
+            #formula-box { font-size: 0.8rem; }
         }
     </style>
 </head>
@@ -79,12 +94,87 @@
             <div id="slot-3" class="img-slot"></div>
         </div>
     </div>
+
+    <!-- Formula text box -->
+    <textarea id="formula-box" readonly placeholder="سيظهر هنا الوصف التركيبي عند اختيار الحروف الأربعة..."></textarea>
 </div>
 
 <script>
     const letters = ["أ", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي"];
     const currentWord = ["", "", "", ""];
     const selects = document.querySelectorAll('.letter-select');
+
+    // Semantic data per letter
+    const semantics = {
+        "أ": { starter: "الاتيان", original: "الدأب", outcome: "التبوئة والإقرار", preOutcome: "التبوئة والإقرار" },
+        "ب": { starter: "البري (المثابرة)", original: "النبض", outcome: "الإكساب-الإيثاب", preOutcome: "الإكساب-الإيثاب" },
+        "ج": { starter: "الجم و التجميع", original: "الرجف", outcome: "الإخراج (التام)", preOutcome: "الإخراج (التام)" },
+        "د": { starter: "الدب و الدفع", original: "الإبدان", outcome: "الإقعاد والاصماد", preOutcome: "الإقعاد والاصماد" },
+        "ه": { starter: "الهبوط و الحلول", original: "الاشهار", outcome: "التأويه والتنزيه", preOutcome: "التأويه والتنزيه" },
+        "و": { starter: "الوثق و القبض", original: "الخواء و الافراغ", outcome: "الإنماء والملء", preOutcome: "الإنماء والملء" },
+        "ز": { starter: "الازاحة", original: "التجزئة", outcome: "القوة المعززة", preOutcome: "القوة المعززة" },
+        "ح": { starter: "الحفظ و الإحاطة", original: "الرحابة", outcome: "الإباحة-البوح", preOutcome: "الإباحة-البوح" },
+        "ط": { starter: "الاطباق", original: "الابطان", outcome: "الإحطاط والإوطاء", preOutcome: "الإحطاط والإوطاء" },
+        "ي": { starter: "اليقين", original: "المشيئة", outcome: "الاتقاء والحماية", preOutcome: "الاتقاء والحماية" },
+        "ك": { starter: "الاكمان و الاكنان", original: "الاحكام", outcome: "الإسلاك والإملاك", preOutcome: "الإسلاك والإملاك" },
+        "ل": { starter: "الالحاح", original: "الإبلاغ", outcome: "الإسالة والبذل", preOutcome: "الإسالة والبذل" },
+        "م": { starter: "المكوث", original: "التسمية", outcome: "الإرغام والإلزام", preOutcome: "الإرغام والإلزام" },
+        "ن": { starter: "الانباع و الانبعاث", original: "المنع", outcome: "التحصين والتأمين", preOutcome: "التحصين والتأمين" },
+        "س": { starter: "السبل و بدء الحركة", original: "الوسع", outcome: "الإهماس والإخماد", preOutcome: "الإهماس والإخماد" },
+        "ع": { starter: "الاعلاء", original: "السعي", outcome: "الإذاعة والإعلان", preOutcome: "الإذاعة والإعلان" },
+        "ف": { starter: "الفتح", original: "الخفت", outcome: "الأنفة والإعفاف", preOutcome: "الأنفة والإعفاف" },
+        "ص": { starter: "التصريح و الاظهار", original: "الحصر", outcome: "الإقصاص", preOutcome: "الإقصاص" },
+        "ق": { starter: "القوة", original: "الإبقاء", outcome: "الشق والاقتطاع", preOutcome: "الشق والاقتطاع" },
+        "ر": { starter: "الارسال", original: "الجريان", outcome: "التكرار", preOutcome: "التكرار" },
+        "ش": { starter: "التشارف", original: "الانتشار", outcome: "الإنفاش", preOutcome: "الإنفاش" },
+        "ت": { starter: "الاخفاض لتحت", original: "الفتق", outcome: "الإسبات والإثبات", preOutcome: "الإسبات والإثبات" },
+        "ث": { starter: "الاثقال", original: "الأثر", outcome: "الإنباث والحرث", preOutcome: "الإنباث والحرث" },
+        "خ": { starter: "الاخفاض و الاضعاف", original: "الادخار", outcome: "الترسيخ", preOutcome: "الترسيخ" },
+        "ذ": { starter: "التذليل", original: "الايذان", outcome: "الحوذ والاتخاذ", preOutcome: "الحوذ والاتخاذ" },
+        "ض": { starter: "التضاد", original: "الارضاخ", outcome: "الإبعاض", preOutcome: "الإبعاض" },
+        "ظ": { starter: "الظفر", original: "الحظر", outcome: "الإغلاظ والوعظ", preOutcome: "الإغلاظ والوعظ" },
+        "غ": { starter: "التغشية", original: "الرغبة", outcome: "الولوغ والبلوغ", preOutcome: "الولوغ والبلوغ" }
+    };
+
+    function updateFormula() {
+        const formulaBox = document.getElementById('formula-box');
+
+        const starterLetter = currentWord[0];
+        const originalLetter = currentWord[1];
+        const outcomeLetter = currentWord[2];
+        const preOutcomeLetter = currentWord[3];
+
+        // If any slot is empty, clear formula
+        if (!starterLetter || !originalLetter || !outcomeLetter || !preOutcomeLetter) {
+            formulaBox.value = "";
+            return;
+        }
+
+        const starterData = semantics[starterLetter];
+        const originalData = semantics[originalLetter];
+        const outcomeData = semantics[outcomeLetter];
+        const preOutcomeData = semantics[preOutcomeLetter];
+
+        if (!starterData || !originalData || !outcomeData || !preOutcomeData) {
+            formulaBox.value = "";
+            return;
+        }
+
+        const starterMeaning = starterData.starter;
+        const originalMeaning = originalData.original;
+        const outcomeMeaning = outcomeData.outcome;
+        const preOutcomeMeaning = preOutcomeData.preOutcome;
+
+        // Your formula:
+        // "حالة من " & original & " يؤثر فيها الأثّار على المتأثر ب " & starter & " حتى " & outcome & " عبر " & pre-outcome
+        const text =
+            "حالة من " + originalMeaning +
+            " يؤثر فيها الأثّار على المتأثر ب " + starterMeaning +
+            " حتى " + outcomeMeaning +
+            " عبر " + preOutcomeMeaning;
+
+        formulaBox.value = text;
+    }
 
     selects.forEach(select => {
         let opt = document.createElement('option');
@@ -102,31 +192,30 @@
             const val = this.value;
             const slot = document.getElementById(`slot-${id}`);
             
-            if(val === "") {
+            if (val === "") {
                 currentWord[id] = "";
                 slot.innerHTML = "";
             } else {
                 currentWord[id] = letters[val];
-                // Folder logic: set0 for Starter, set1 for Original, etc.
                 slot.innerHTML = `<img src="set${id}/${val}.svg" alt="letter">`;
             }
-            // Join letters 0-3. In RTL direction, index 0 appears on the right.
-            document.getElementById('word-preview').textContent = currentWord[0] + currentWord[1] + currentWord[2] + currentWord[3];
+
+            document.getElementById('word-preview').textContent =
+                currentWord[0] + currentWord[1] + currentWord[2] + currentWord[3];
+
+            updateFormula();
         });
     });
 </script>
-<script>
-    // Replace 'YOUR_HF_TOKEN' with your actual token from Hugging Face
-    const HF_TOKEN = "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";
-    
 
+<!-- Your AI image script remains unchanged if you still need it -->
+<script>
+    const HF_TOKEN = "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";
 
     async function generateAIImage() {
         const loader = document.getElementById('loader');
         const resultImg = document.getElementById('ai-result');
         
-        // Create a prompt based on the 4 selected items
-        // Example: "A story about Apple, Orange, Cat, and House in one scene"
         const prompt = `A single high-quality creative illustration combining: ${currentWord[0]}, ${currentWord[1]}, ${currentWord[2]}, and ${currentWord[3]}. Highly detailed, artistic style.`;
 
         loader.style.display = "block";
@@ -156,8 +245,4 @@
 </script>
 
 </body>
-
 </html>
-
-
-
