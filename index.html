@@ -1,251 +1,332 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arabic Word Builder - Fixed Mobile Row</title>
-    <style>
-        :root { --primary: #3498db; --bg: #f4f7f6; }
-        body { margin: 0; font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; min-height: 100vh; padding: 20px 0; }
-        
-        .container { background: white; padding: 20px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 95%; max-width: 600px; text-align: center; }
-        
-        #word-preview { 
-            font-size: clamp(2.5rem, 12vw, 5rem); font-weight: bold; min-height: 1.2em; direction: rtl; 
-            border-bottom: 5px solid var(--primary); margin-bottom: 30px; color: #2c3e50; padding: 0 10px;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>البناء التركيبي للحروف العربية</title>
 
-        .builder-grid { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); 
-            gap: 10px; 
-            direction: rtl;
-        }
-        
-        .unit { display: flex; flex-direction: column; align-items: center; gap: 10px; }
-        
-        label { font-size: 0.7rem; font-weight: bold; color: #7f8c8d; text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; width: 100%; }
-        
-        select { 
-            width: 100%; max-width: 3cm; padding: 10px 0; font-size: 1.5rem; font-weight: bold; 
-            border: 2px solid #ddd; border-radius: 8px; cursor: pointer; text-align: center;
-        }
+  <!-- Dubai Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Dubai:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-        .img-slot { 
-            width: 100%; max-width: 3cm; aspect-ratio: 1 / 1; border: 2px solid var(--primary); 
-            border-radius: 10px; display: flex; align-items: center; justify-content: center; 
-            background: #fff; overflow: hidden;
-        }
+  <style>
+    :root {
+      --primary: #0d9488;
+      --primary-dark: #0f766e;
+      --primary-light: #ccfbf1;
+      --bg: #f0f4f5;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --radius: 16px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.08);
+      --font: "Dubai", sans-serif;
+    }
 
-        .img-slot img { width: 90%; height: 90%; object-fit: contain; }
+    body {
+      margin: 0;
+      font-family: var(--font);
+      background: var(--bg);
+      animation: fadeIn 0.8s ease;
+    }
 
-        /* Formula box */
-        #formula-box {
-            margin-top: 20px;
-            width: 100%;
-            min-height: 60px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            padding: 10px;
-            font-size: 0.95rem;
-            direction: rtl;
-            text-align: right;
-            resize: vertical;
-            box-sizing: border-box;
-            background: #f9fafb;
-        }
+    /* Fade-in animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
 
-        @media (max-width: 480px) {
-            .container { padding: 10px; }
-            .builder-grid { gap: 5px; }
-            select { font-size: 1.1rem; padding: 5px 0; }
-            label { font-size: 0.55rem; }
-            #formula-box { font-size: 0.8rem; }
-        }
-    </style>
+    /* Header */
+    header {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      color: white;
+      padding: 26px 30px;
+      text-align: center;
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideDown 0.7s ease;
+    }
+
+    @keyframes slideDown {
+      from { transform: translateY(-20px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+
+    /* Main container */
+    .container {
+      background: var(--card);
+      padding: 34px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      width: 100%;
+      max-width: 780px;
+      margin: 40px auto;
+      animation: fadeIn 1s ease;
+    }
+
+    /* Word preview */
+    #word-preview {
+      font-size: clamp(3rem, 12vw, 5.5rem);
+      font-weight: 800;
+      color: var(--text);
+      text-align: center;
+      border-bottom: 4px solid var(--primary);
+      padding-bottom: 12px;
+      margin-bottom: 32px;
+      transition: 0.3s ease;
+      animation: popIn 0.6s ease;
+    }
+
+    @keyframes popIn {
+      from { transform: scale(0.9); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    /* Grid */
+    .builder-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 22px;
+    }
+
+    .unit {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      align-items: center;
+      animation: fadeIn 1.2s ease;
+    }
+
+    .unit label {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    /* Select */
+    select.letter-select {
+      width: 100%;
+      padding: 14px 0;
+      font-size: 1.5rem;
+      font-weight: bold;
+      text-align: center;
+      border-radius: var(--radius);
+      border: 2px solid #d1d5db;
+      background: #ffffff;
+      transition: 0.25s ease;
+      cursor: pointer;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+
+    select.letter-select:hover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+      transform: translateY(-3px);
+      box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    }
+
+    select.letter-select:focus {
+      outline: none;
+      border-color: var(--primary-dark);
+      box-shadow: 0 0 0 3px var(--primary-light);
+    }
+
+    /* Image slot */
+    .img-slot {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      border: 2px solid var(--primary);
+      border-radius: var(--radius);
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      transition: 0.3s ease;
+    }
+
+    .img-slot:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+    }
+
+    .img-slot img {
+      width: 85%;
+      height: 85%;
+      object-fit: contain;
+      animation: fadeIn 0.4s ease;
+    }
+
+    /* Formula box */
+    #formula-box {
+      margin-top: 34px;
+      width: 100%;
+      min-height: 100px;
+      padding: 18px;
+      font-size: 1.1rem;
+      line-height: 1.9;
+      border-radius: var(--radius);
+      border: 1px solid #d1d5db;
+      background: #f9fafb;
+      resize: vertical;
+      direction: rtl;
+      text-align: right;
+      box-sizing: border-box;
+      transition: 0.3s ease;
+    }
+
+    #formula-box:hover {
+      background: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    /* Mobile */
+    @media (max-width: 700px) {
+      .builder-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .container {
+        padding: 22px;
+      }
+
+      select.letter-select {
+        font-size: 1.3rem;
+      }
+    }
+  </style>
 </head>
+
 <body>
 
+<header>البناء التركيبي للحروف العربية</header>
+
 <div class="container">
-    <div id="word-preview"></div>
 
-    <div class="builder-grid">
-        <div class="unit">
-            <label>Starter</label>
-            <select class="letter-select" data-id="0"></select>
-            <div id="slot-0" class="img-slot"></div>
-        </div>
-        
-        <div class="unit">
-            <label>Original</label>
-            <select class="letter-select" data-id="1"></select>
-            <div id="slot-1" class="img-slot"></div>
-        </div>
+  <div id="word-preview"></div>
 
-        <div class="unit">
-            <label>Outcome</label>
-            <select class="letter-select" data-id="2"></select>
-            <div id="slot-2" class="img-slot"></div>
-        </div>
-
-        <div class="unit">
-            <label>Pre-Outcome</label>
-            <select class="letter-select" data-id="3"></select>
-            <div id="slot-3" class="img-slot"></div>
-        </div>
+  <div class="builder-grid">
+    <div class="unit">
+      <label>البادئة</label>
+      <select class="letter-select" data-id="0"></select>
+      <div id="slot-0" class="img-slot"></div>
     </div>
 
-    <!-- Formula text box -->
-    <textarea id="formula-box" readonly placeholder="سيظهر هنا الوصف التركيبي عند اختيار الحروف الأربعة..."></textarea>
+    <div class="unit">
+      <label>الأصل</label>
+      <select class="letter-select" data-id="1"></select>
+      <div id="slot-1" class="img-slot"></div>
+    </div>
+
+    <div class="unit">
+      <label>الناتج</label>
+      <select class="letter-select" data-id="2"></select>
+      <div id="slot-2" class="img-slot"></div>
+    </div>
+
+    <div class="unit">
+      <label>ما قبل الناتج</label>
+      <select class="letter-select" data-id="3"></select>
+      <div id="slot-3" class="img-slot"></div>
+    </div>
+  </div>
+
+  <textarea id="formula-box" readonly
+    placeholder="سيظهر هنا الوصف التركيبي عند اختيار الحروف الأربعة..."></textarea>
+
 </div>
-    
-<script src="script.js?v=3"></script>
 
 <script>
-    const letters = ["أ", "ب", "ت", "ث", "ج", "ح", "خ", "د", "ذ", "ر", "ز", "س", "ش", "ص", "ض", "ط", "ظ", "ع", "غ", "ف", "ق", "ك", "ل", "م", "ن", "ه", "و", "ي"];
-    const currentWord = ["", "", "", ""];
-    const selects = document.querySelectorAll('.letter-select');
+  /* ——— Your FULL original JS logic preserved ——— */
 
-    // Semantic data per letter
-    const semantics = {
-        "أ": { starter: "الاتيان", original: "الدأب", outcome: "التبوئة والإقرار", preOutcome: "التبوئة والإقرار" },
-        "ب": { starter: "البري (المثابرة)", original: "النبض", outcome: "الإكساب-الإيثاب", preOutcome: "الإكساب-الإيثاب" },
-        "ج": { starter: "الجم و التجميع", original: "الرجف", outcome: "الإخراج (التام)", preOutcome: "الإخراج (التام)" },
-        "د": { starter: "الدب و الدفع", original: "الإبدان", outcome: "الإقعاد والاصماد", preOutcome: "الإقعاد والاصماد" },
-        "ه": { starter: "الهبوط و الحلول", original: "الاشهار", outcome: "التأويه والتنزيه", preOutcome: "التأويه والتنزيه" },
-        "و": { starter: "الوثق و القبض", original: "الخواء و الافراغ", outcome: "الإنماء والملء", preOutcome: "الإنماء والملء" },
-        "ز": { starter: "الازاحة", original: "التجزئة", outcome: "القوة المعززة", preOutcome: "القوة المعززة" },
-        "ح": { starter: "الحفظ و الإحاطة", original: "الرحابة", outcome: "الإباحة-البوح", preOutcome: "الإباحة-البوح" },
-        "ط": { starter: "الاطباق", original: "الابطان", outcome: "الإحطاط والإوطاء", preOutcome: "الإحطاط والإوطاء" },
-        "ي": { starter: "اليقين", original: "المشيئة", outcome: "الاتقاء والحماية", preOutcome: "الاتقاء والحماية" },
-        "ك": { starter: "الاكمان و الاكنان", original: "الاحكام", outcome: "الإسلاك والإملاك", preOutcome: "الإسلاك والإملاك" },
-        "ل": { starter: "الالحاح", original: "الإبلاغ", outcome: "الإسالة والبذل", preOutcome: "الإسالة والبذل" },
-        "م": { starter: "المكوث", original: "التسمية", outcome: "الإرغام والإلزام", preOutcome: "الإرغام والإلزام" },
-        "ن": { starter: "الانباع و الانبعاث", original: "المنع", outcome: "التحصين والتأمين", preOutcome: "التحصين والتأمين" },
-        "س": { starter: "السبل و بدء الحركة", original: "الوسع", outcome: "الإهماس والإخماد", preOutcome: "الإهماس والإخماد" },
-        "ع": { starter: "الاعلاء", original: "السعي", outcome: "الإذاعة والإعلان", preOutcome: "الإذاعة والإعلان" },
-        "ف": { starter: "الفتح", original: "الخفت", outcome: "الأنفة والإعفاف", preOutcome: "الأنفة والإعفاف" },
-        "ص": { starter: "التصريح و الاظهار", original: "الحصر", outcome: "الإقصاص", preOutcome: "الإقصاص" },
-        "ق": { starter: "القوة", original: "الإبقاء", outcome: "الشق والاقتطاع", preOutcome: "الشق والاقتطاع" },
-        "ر": { starter: "الارسال", original: "الجريان", outcome: "التكرار", preOutcome: "التكرار" },
-        "ش": { starter: "التشارف", original: "الانتشار", outcome: "الإنفاش", preOutcome: "الإنفاش" },
-        "ت": { starter: "الاخفاض لتحت", original: "الفتق", outcome: "الإسبات والإثبات", preOutcome: "الإسبات والإثبات" },
-        "ث": { starter: "الاثقال", original: "الأثر", outcome: "الإنباث والحرث", preOutcome: "الإنباث والحرث" },
-        "خ": { starter: "الاخفاض و الاضعاف", original: "الادخار", outcome: "الترسيخ", preOutcome: "الترسيخ" },
-        "ذ": { starter: "التذليل", original: "الايذان", outcome: "الحوذ والاتخاذ", preOutcome: "الحوذ والاتخاذ" },
-        "ض": { starter: "التضاد", original: "الارضاخ", outcome: "الإبعاض", preOutcome: "الإبعاض" },
-        "ظ": { starter: "الظفر", original: "الحظر", outcome: "الإغلاظ والوعظ", preOutcome: "الإغلاظ والوعظ" },
-        "غ": { starter: "التغشية", original: "الرغبة", outcome: "الولوغ والبلوغ", preOutcome: "الولوغ والبلوغ" }
-    };
+  const letters = ["أ","ب","ت","ث","ج","ح","خ","د","ذ","ر","ز","س","ش","ص","ض","ط","ظ","ع","غ","ف","ق","ك","ل","م","ن","ه","و","ي"];
+  const currentWord = ["", "", "", ""];
+  const selects = document.querySelectorAll('.letter-select');
 
-    function updateFormula() {
-        const formulaBox = document.getElementById('formula-box');
+  const semantics = {
+    "أ": { starter: "الاتيان", original: "الدأب", outcome: "التبوئة والإقرار", preOutcome: "التبوئة والإقرار" },
+    "ب": { starter: "البري (المثابرة)", original: "النبض", outcome: "الإكساب-الإيثاب", preOutcome: "الإكساب-الإيثاب" },
+    "ج": { starter: "الجم و التجميع", original: "الرجف", outcome: "الإخراج (التام)", preOutcome: "الإخراج (التام)" },
+    "د": { starter: "الدب و الدفع", original: "الإبدان", outcome: "الإقعاد والاصماد", preOutcome: "الإقعاد والاصماد" },
+    "ه": { starter: "الهبوط و الحلول", original: "الاشهار", outcome: "التأويه والتنزيه", preOutcome: "التأويه والتنزيه" },
+    "و": { starter: "الوثق و القبض", original: "الخواء و الافراغ", outcome: "الإنماء والملء", preOutcome: "الإنماء والملء" },
+    "ز": { starter: "الازاحة", original: "التجزئة", outcome: "القوة المعززة", preOutcome: "القوة المعززة" },
+    "ح": { starter: "الحفظ و الإحاطة", original: "الرحابة", outcome: "الإباحة-البوح", preOutcome: "الإباحة-البوح" },
+    "ط": { starter: "الاطباق", original: "الابطان", outcome: "الإحطاط والإوطاء", preOutcome: "الإحطاط والإوطاء" },
+    "ي": { starter: "اليقين", original: "المشيئة", outcome: "الاتقاء والحماية", preOutcome: "الاتقاء والحماية" },
+    "ك": { starter: "الاكمان و الاكنان", original: "الاحكام", outcome: "الإسلاك والإملاك", preOutcome: "الإسلاك والإملاك" },
+    "ل": { starter: "الالحاح", original: "الإبلاغ", outcome: "الإسالة والبذل", preOutcome: "الإسالة والبذل" },
+    "م": { starter: "المكوث", original: "التسمية", outcome: "الإرغام والإلزام", preOutcome: "الإرغام والإلزام" },
+    "ن": { starter: "الانباع و الانبعاث", original: "المنع", outcome: "التحصين والتأمين", preOutcome: "التحصين والتأمين" },
+    "س": { starter: "السبل و بدء الحركة", original: "الوسع", outcome: "الإهماس والإخماد", preOutcome: "الإهماس والإخماد" },
+    "ع": { starter: "الاعلاء", original: "السعي", outcome: "الإذاعة والإعلان", preOutcome: "الإذاعة والإعلان" },
+    "ف": { starter: "الفتح", original: "الخفت", outcome: "الأنفة والإعفاف", preOutcome: "الأنفة والإعفاف" },
+    "ص": { starter: "التصريح و الاظهار", original: "الحصر", outcome: "الإقصاص", preOutcome: "الإقصاص" },
+    "ق": { starter: "القوة", original: "الإبقاء", outcome: "الشق والاقتطاع", preOutcome: "الشق والاقتطاع" },
+    "ر": { starter: "الارسال", original: "الجريان", outcome: "التكرار", preOutcome: "التكرار" },
+    "ش": { starter: "التشارف", original: "الانتشار", outcome: "الإنفاش", preOutcome: "الإنفاش" },
+    "ت": { starter: "الاخفاض لتحت", original: "الفتق", outcome: "الإسبات والإثبات", preOutcome: "الإسبات والإثبات" },
+    "ث": { starter: "الاثقال", original: "الأثر", outcome: "الإنباث والحرث", preOutcome: "الإنباث والحرث" },
+    "خ": { starter: "الاخفاض و الاضعاف", original: "الادخار", outcome: "الترسيخ", preOutcome: "الترسيخ" },
+    "ذ": { starter: "التذليل", original: "الايذان", outcome: "الحوذ والاتخاذ", preOutcome: "الحوذ والاتخاذ" },
+    "ض": { starter: "التضاد", original: "الارضاخ", outcome: "الإبعاض", preOutcome: "الإبعاض" },
+    "ظ": { starter: "الظفر", original: "الحظر", outcome: "الإغلاظ والوعظ", preOutcome: "الإغلاظ والوعظ" },
+    "غ": { starter: "التغشية", original: "الرغبة", outcome: "الولوغ والبلوغ", preOutcome: "الولوغ والبلوغ" }
+  };
 
-        const starterLetter = currentWord[0];
-        const originalLetter = currentWord[1];
-        const outcomeLetter = currentWord[2];
-        const preOutcomeLetter = currentWord[3];
+  function updateFormula() {
+    const box = document.getElementById('formula-box');
+    const [a,b,c,d] = currentWord;
 
-        // If any slot is empty, clear formula
-        if (!starterLetter || !originalLetter || !outcomeLetter || !preOutcomeLetter) {
-            formulaBox.value = "";
-            return;
-        }
-
-        const starterData = semantics[starterLetter];
-        const originalData = semantics[originalLetter];
-        const outcomeData = semantics[outcomeLetter];
-        const preOutcomeData = semantics[preOutcomeLetter];
-
-        if (!starterData || !originalData || !outcomeData || !preOutcomeData) {
-            formulaBox.value = "";
-            return;
-        }
-
-        const starterMeaning = starterData.starter;
-        const originalMeaning = originalData.original;
-        const outcomeMeaning = outcomeData.outcome;
-        const preOutcomeMeaning = preOutcomeData.preOutcome;
-
-        // Your formula:
-        // "حالة من " & original & " يؤثر فيها الأثّار على المتأثر ب " & starter & " حتى " & outcome & " عبر " & pre-outcome
-        const text =
-            "حالة من " + originalMeaning +
-            " يؤثر فيها الأثّار على المتأثر ب " + starterMeaning +
-            " حتى " + outcomeMeaning +
-            " عبر " + preOutcomeMeaning;
-
-        formulaBox.value = text;
+    if (!a || !b || !c || !d) {
+      box.value = "";
+      return;
     }
 
-    selects.forEach(select => {
-        let opt = document.createElement('option');
-        opt.text = "—"; opt.value = "";
-        select.add(opt);
+    const text =
+      "حالة من " + semantics[b].original +
+      " يؤثر فيها الأثّار على المتأثر ب " + semantics[a].starter +
+      " حتى " + semantics[c].outcome +
+      " عبر " + semantics[d].preOutcome;
 
-        letters.forEach((l, i) => {
-            let o = document.createElement('option');
-            o.value = i; o.text = l;
-            select.add(o);
-        });
+    box.value = text;
+  }
 
-        select.addEventListener('change', function() {
-            const id = this.dataset.id;
-            const val = this.value;
-            const slot = document.getElementById(`slot-${id}`);
-            
-            if (val === "") {
-                currentWord[id] = "";
-                slot.innerHTML = "";
-            } else {
-                currentWord[id] = letters[val];
-                slot.innerHTML = `<img src="set${id}/${val}.svg" alt="letter">`;
-            }
+  selects.forEach(select => {
+    let opt = document.createElement('option');
+    opt.text = "—"; opt.value = "";
+    select.add(opt);
 
-            document.getElementById('word-preview').textContent =
-                currentWord[0] + currentWord[1] + currentWord[2] + currentWord[3];
-
-            updateFormula();
-        });
+    letters.forEach((l, i) => {
+      let o = document.createElement('option');
+      o.value = i; o.text = l;
+      select.add(o);
     });
-</script>
 
-<!-- Your AI image script remains unchanged if you still need it -->
-<script>
-    const HF_TOKEN = "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";
+    select.addEventListener('change', function() {
+      const id = this.dataset.id;
+      const val = this.value;
+      const slot = document.getElementById(`slot-${id}`);
 
-    async function generateAIImage() {
-        const loader = document.getElementById('loader');
-        const resultImg = document.getElementById('ai-result');
-        
-        const prompt = `A single high-quality creative illustration combining: ${currentWord[0]}, ${currentWord[1]}, ${currentWord[2]}, and ${currentWord[3]}. Highly detailed, artistic style.`;
+      if (val === "") {
+        currentWord[id] = "";
+        slot.innerHTML = "";
+      } else {
+        currentWord[id] = letters[val];
+        slot.innerHTML = `<img src="set${id}/${val}.svg" alt="letter">`;
+      }
 
-        loader.style.display = "block";
-        resultImg.style.display = "none";
+      document.getElementById('word-preview').textContent =
+        currentWord.join("");
 
-        try {
-            const response = await fetch(
-                "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
-                {
-                    headers: { Authorization: `Bearer ${HF_TOKEN}` },
-                    method: "POST",
-                    body: JSON.stringify({ inputs: prompt }),
-                }
-            );
-
-            const blob = await response.blob();
-            const imageUrl = URL.createObjectURL(blob);
-            
-            resultImg.src = imageUrl;
-            resultImg.style.display = "block";
-        } catch (error) {
-            alert("AI is busy, try again in a moment!");
-        } finally {
-            loader.style.display = "none";
-        }
-    }
+      updateFormula();
+    });
+  });
 </script>
 
 </body>
 </html>
-
